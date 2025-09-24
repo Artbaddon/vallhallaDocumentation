@@ -1,0 +1,1 @@
+La hoja de Angular sirve para tener referencia de comandos, componentes HTML y demas.

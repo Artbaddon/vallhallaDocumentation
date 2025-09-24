@@ -1,0 +1,5269 @@
+{
+	"info": {
+		"_postman_id": "6e123a11-81ed-493b-b674-72803e15e3ae",
+		"name": "Vallhalla API Modular Collection",
+		"description": "API collection structured by module and HTTP method for Vallhalla API.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "31619283",
+		"_collection_link": "https://vallhallaapi.postman.co/workspace/VallhallaAPI-Workspace~3f6a5cb7-e20f-4dac-8834-14913808c450/collection/45070968-6e123a11-81ed-493b-b674-72803e15e3ae?action=share&source=collection_link&creator=31619283"
+	},
+	"item": [
+		{
+			"name": "00_Authentication",
+			"item": [
+				{
+					"name": "Check Server Status",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Server is running\", function() {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}",
+							"host": [
+								"{{baseUrl}}"
+							]
+						},
+						"description": "### Check Server API Endpoint\n\nThis endpoint is used to retrieve data from the specified resource at `{{baseUrl}}`.\n\n#### Request Format\n\n- **Method**: GET\n    \n- **Request Body**: No request body is required for this GET request.\n    \n\n#### Response Format\n\n- **Status Code**:\n    \n    - `401 Unauthorized`: This status indicates that the request has not been applied because it lacks valid authentication credentials for the target resource.\n        \n- **Content-Type**: application/json\n    \n- **Response Body**: The response will return a JSON object containing a message. In this case, the message is an empty string.\n    \n\n### Summary\n\nEnsure that valid authentication credentials are provided when making the request to avoid receiving a 401 Unauthorized response."
+					},
+					"response": []
+				},
+				{
+					"name": "Login (Get Token)",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var jsonData = JSON.parse(responseBody);",
+									"if (jsonData && jsonData.token) {",
+									"    pm.collectionVariables.set('authToken', jsonData.token);",
+									"    console.log('Token saved to variable: authToken');",
+									"    pm.test(\"Token saved successfully\", function() {",
+									"        pm.expect(pm.collectionVariables.get('authToken')).to.not.be.empty;",
+									"    });",
+									"} else {",
+									"    console.log('No token found in response');",
+									"    pm.test(\"No token found in response\", function() {",
+									"        pm.expect.fail('Authentication failed - no token received');",
+									"    });",
+									"}"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"12345678\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/auth/login",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						},
+						"description": "### Login Endpoint\n\nThis endpoint is used to authenticate a user by validating their credentials. It accepts a username and password, and upon successful validation, it grants access to the system.\n\n#### Request\n\n- **Method**: POST\n    \n- **URL**: `{{baseUrl}}/auth/login`\n    \n- **Content-Type**: application/json\n    \n\n##### Request Body Parameters:\n\n- `username` (string): The username of the user attempting to log in.\n    \n- `password` (string): The password associated with the username.\n    \n\n##### Example Request Body:\n\n``` json\n{\n  \"username\": \"admin\",\n  \"password\": \"12345678\"\n}\n\n ```\n\n#### Response\n\n- **Status Code**: 200 (Login successful)\n    \n- **Content-Type**: application/json\n    \n\n##### Response Structure:\n\nThis endpoint is crucial for user authentication and should be used with secure practices to protect user credentials."
+					},
+					"response": []
+				},
+				{
+					"name": "Validate Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Token is valid\", function() {",
+									"    pm.response.to.have.status(200);",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{authToken}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/auth/validate-token",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"auth",
+								"validate-token"
+							]
+						},
+						"description": "## Validate Token Endpoint\n\nThis endpoint is used to validate a user's authentication token. It checks whether the provided token is still valid and has not expired. This is essential for maintaining secure sessions and ensuring that users have the appropriate access to resources.\n\n### Request\n\n- **Method**: GET\n    \n- **URL**: `{{baseUrl}}/auth/validate-token`\n    \n\n### Request Body\n\nThis endpoint does not require a request body. The token should be included in the request headers as an authorization bearer token.\n\n### Response\n\nUpon a successful request, the response will contain information regarding the validity of the token. The structure of the response is as follows:\n\n- **status**: Indicates the result of the validation (e.g., valid or invalid).\n    \n- **message**: Provides additional information about the validation result.\n    \n- **expiresAt**: (Optional) Indicates when the token will expire, if applicable.\n    \n\n### Example Response\n\n``` json\n{\n  \"status\": \"valid\",\n  \"message\": \"Token is valid.\",\n  \"expiresAt\": \"2023-12-31T23:59:59Z\"\n}\n\n ```\n\nThis endpoint is crucial for ensuring that users maintain a secure session and can continue to access protected resources without interruption."
+					},
+					"response": []
+				}
+			],
+			"description": "Processes for user authentication  \n________________________________________________________  \nProcesos para la autenticacion de usuarios"
+		},
+		{
+			"name": "apartments",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Apartments",
+							"request": {
+								"auth": {
+									"type": "noauth"
+								},
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/apartments/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"apartments",
+										""
+									]
+								},
+								"description": "## Show All Apartments Endpoint\n\nThis endpoint retrieves a list of apartments available in the system.\n\n### Request\n\n- **Method**: GET\n    \n- **URL**: `http://localhost:3000/api/apartments`\n    \n\n### Response Structure\n\nThe response will be in JSON format and will include an array of apartment objects. Each apartment object may contain the following fields:\n\n- `id`: Unique identifier for the apartment.\n    \n- `status`: The status of the apartment.\n    \n- `tower`: Tower of the apartment\n    \n- `owner`: Owner of the apartment\n    \n\n### Example Response\n\n``` json\n[\n    {\n        \"id\": \"1\",\n        \"status\": \"Available\",\n        \"tower\": \"Tower A\",\n        \"owner\": \"1\"\n    },\n    {\n        \"id\": \"2\",\n        \"status\": \"Occupied\",\n        \"tower\": \"Tower A\",\n        \"owner\": \"2\"\n    }\n]\n\n ```\n\nThis response provides a comprehensive overview of the apartments, allowing users to make informed decisions based on the details provided."
+							},
+							"response": []
+						},
+						{
+							"name": "Show Apartment Details",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/apartments/details",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"apartments",
+										"details"
+									]
+								},
+								"description": "## Show Apartment Details Endpoint\n\nThis endpoint retrieves detailed information about all apartments.\n\n### Request\n\n- **Method**: GET\n    \n- **URL**: `{{baseUrl}}/apartments/details`\n    \n\n#### Request Format\n\n- **Method**: GET\n    \n- **Request Body**: No request body is required for this GET request.\n    \n\n### Response\n\nThe response will return a JSON object containing the following fields:\n\n- `id`: The unique identifier of the apartment.\n    \n- `number`: The number of the apartment.\n    \n- `status`: Status of the apartment.\n    \n- `tower`: Tower of the apartment.\n    \n- `owner`: Owner of the apartment.\n    \n\n### Example Response Structure\n\n``` json\n{\n  \"id\": \"1\",\n  \"number\": \" \",\n  \"status\": \" \",\n  \"tower\": \" \",\n  \"owner\": \" \"\n}\n{\n  \"id\": \"2\",\n  \"number\": \" \",\n  \"status\": \" \",\n  \"tower\": \" \",\n  \"owner\": \" \"\n}\n\n\n ```\n\nThis endpoint is essential for users looking to obtain specific information about apartments in order to make informed decisions regarding their housing options."
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Number",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/apartments/search/number?apartment_number=10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"apartments",
+										"search",
+										"number"
+									],
+									"query": [
+										{
+											"key": "apartment_number",
+											"value": "10"
+										}
+									]
+								},
+								"description": "### Find By Number Endpoint\n\nThis endpoint retrieves the details of a specific apartment based on the provided apartment number.\n\n#### Request Format\n\n- **Method**: GET\n    \n- **Request Body**: No request body is required for this GET request.\n    \n\n#### Response Structure\n\nThe response will return a JSON object containing the details of the apartment associated with the specified apartment number. The structure of the response may include keys such as:\n\n- `id`: The unique identifier of the apartment.\n    \n- `status`: Status of the apartment.\n    \n- `tower`: Tower of the apartment.\n    \n- `owner`: Owner of the apartment.\n    \n\n``` json\n{\n    \"id\": \"1\",\n    \"status\": \"Available\",\n    \"tower\": \"Tower A\",\n    \"owner\": \"1\"\n}\n\n ```\n\nEnsure that the apartment number provided in the request is valid to receive accurate results."
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Owner",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/apartments/search/owner?owner_id=1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"apartments",
+										"search",
+										"owner"
+									],
+									"query": [
+										{
+											"key": "owner_id",
+											"value": "1"
+										}
+									]
+								},
+								"description": "## Find By Owner Endpoint\n\nThis endpoint retrieves a list of apartments associated with a specific owner. It allows users to search for apartments based on the owner's unique identifier.\n\n### Request\n\n- **Method**: GET\n    \n- **URL**: `http://localhost:3000/api/apartments/details`\n    \n\n#### Request Format\n\n- **Method**: GET\n    \n- **Request Body**: No request body is required for this GET request.\n    \n\n#### Response Structure\n\nThe response will return a JSON object containing the details of the apartment associated with the specified apartment number. The structure of the response may include keys such as:\n\n- `id`: The unique identifier of the apartment.\n    \n- `status`: Status of the apartment.\n    \n- `tower`: Tower of the apartment.\n    \n- `owner`: Owner of the apartment.\n    \n\n``` json\n{\n    \"id\": \"1\",\n    \"status\": \"Available\",\n    \"tower\": \"Tower A\",\n    \"owner\": \"1\"\n}\n\n\n ```\n\nThis endpoint is useful for property managers and owners to quickly access and manage their listings based on ownership."
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Status",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/apartments/search/status?status_id=1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"apartments",
+										"search",
+										"status"
+									],
+									"query": [
+										{
+											"key": "status_id",
+											"value": "1"
+										}
+									]
+								},
+								"description": "### Find by Status Endpoint\n\nThis endpoint allows users to retrieve a list of apartments filtered by their current status. The request is made using an HTTP GET method, and it requires a query parameter to specify the desired status of the apartments.\n\n#### Request Format\n\n- **Method**: GET\n    \n- **Request Body**: No request body is required for this GET request.\n    \n\n#### Response Structure\n\nThe response will return a JSON object containing the details of the apartment associated with the specified apartment number. The structure of the response may include keys such as:\n\n- `id`: The unique identifier of the apartment.\n    \n- `status`: Status of the apartment.\n    \n- `tower`: Tower of the apartment.\n    \n- `owner`: Owner of the apartment.\n    \n\n``` json\n{\n    \"id\": \"1\",\n    \"status\": \"Available\",\n    \"tower\": \"Tower A\",\n    \"owner\": \"1\"\n}\n\n\n ```\n\nThis endpoint is useful for users looking to find apartments based on their availability status."
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Tower",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/apartments/search/tower?tower_id=1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"apartments",
+										"search",
+										"tower"
+									],
+									"query": [
+										{
+											"key": "tower_id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Occupancy Report",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/apartments/report/occupancy",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"apartments",
+										"report",
+										"occupancy"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/apartments/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"apartments",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find With Details",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/apartments/1/details",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"apartments",
+										"1",
+										"details"
+									]
+								}
+							},
+							"response": []
+						}
+					],
+					"description": "Processes with the GET method.  \n______________________________________________  \nProcesos con el método GET."
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Apartment",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"apartment_number\": \"103\",\n  \"status_id\": 1,\n  \"tower_id\": 1,\n  \"owner_id\": 1\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/apartments",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"apartments"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Apartment",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"apartment_number\": \"101A\",\n  \"status_id\": 2,\n  \"tower_id\": 1,\n  \"owner_id\": 1\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/apartments/2",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"apartments",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Status",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"status_id\": 2\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/apartments/1/status",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"apartments",
+										"1",
+										"status"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Apartment",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/apartments/11",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"apartments",
+										"11"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			],
+			"description": "Management for the apartment module.\n\n---\n\nGestión para el módulo de apartamentos."
+		},
+		{
+			"name": "owners",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Owners",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/owners/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"owners",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Show Owner Details",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/owners/details",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"owners",
+										"details"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/owners/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"owners",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find With Details",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/owners/1/details",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"owners",
+										"1",
+										"details"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Owner with User and Profile",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"username\": \"aldair2\",\n  \"password\": \"password123\",\n  \"user_status_id\": 1,\n  \"role_id\": 3,\n  \"is_tenant\": true,\n  \"birth_date\": \"1990-01-15\",\n  \"first_name\": \"John\",\n  \"last_name\": \"Doe\",\n  \"document_type\": \"CC\",\n  \"document_number\": \"1234567890\",\n  \"phone\": \"555-123-4567\",\n  \"photo_url\": null\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/owners",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"owners"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Owner with User and Profile",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"username\": \"updated_owner\",\n  \"password\": \"newpassword123\",\n  \"user_status_id\": 1,\n  \"role_id\": 3,\n  \"is_tenant\": false,\n  \"birth_date\": \"1992-05-20\",\n  \"first_name\": \"Jane\",\n  \"last_name\": \"Smith\",\n  \"document_type\": \"CC\",\n  \"document_number\": \"9876543210\",\n  \"phone\": \"555-987-6543\",\n  \"photo_url\": null\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/owners/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"owners",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Owner",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/owners/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"owners",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "users",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Users",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/users/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Show User Details",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/users/details",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"details"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Name",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/users/search?name=admin",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"search"
+									],
+									"query": [
+										{
+											"key": "name",
+											"value": "admin"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/users/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register User with Profile",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"username2\",\n  \"password\": \"userpassword\",\n  \"user_status_id\": 1,\n  \"role_id\": 1,\n  \"profile\": {\n    \"first_name\": \"John\",\n    \"last_name\": \"Doe\",\n    \"phone\": \"1234567890\",           // Optional\n    \"document_type_id\": \"CC\",        // Optional\n    \"document_number\": \"123456789\",  // Optional\n    \"photo_url\": null               // Optional\n  }\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/users",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Register User (Minimal Profile)",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Jane Smith\",\n  \"user_status_id\": 1,\n  \"role_id\": 3,\n  \"profile\": {\n    \"first_name\": \"Jane\",\n    \"last_name\": \"Smith\"\n  }\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/users",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update User",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Jane Doe\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/users/3",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"3"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Status",
+							"request": {
+								"method": "PATCH",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"status_id\": 2\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/users/4/status",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"4",
+										"status"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete User",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/users/5",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"users",
+										"5"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "notifications",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Notifications",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/notifications/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"notifications",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Stats",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/notifications/stats",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"notifications",
+										"stats"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/notifications/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"notifications",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Recipient",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/notifications/recipient/1/user",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"notifications",
+										"recipient",
+										"1",
+										"user"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Type",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/notifications/type/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"notifications",
+										"type",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Notification",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"type_id\": 2,\n  \"description\": \"New payment created: PAY-1751515172196-830WGA for 1000\",\n  \"user_id\": 0  // Using 0 makes it visible to all users\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/notifications",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"notifications"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Notification",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"type_id\": 2,  // Payment type\n  \"description\": \"Your notification message\",\n  \"user_id\": 1   // For specific user, or 0/omit for all users\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/notifications/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"notifications",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Notification",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/notifications/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"notifications",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "auth",
+			"item": [
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Login",
+							"event": [
+								{
+									"listen": "test",
+									"script": {
+										"exec": [
+											"var jsonData = JSON.parse(responseBody);",
+											"if (jsonData && jsonData.token) {",
+											"    pm.collectionVariables.set('authToken', jsonData.token);",
+											"    console.log('Token saved to variable: authToken');",
+											"} else {",
+											"    console.log('No token found in response');",
+											"}"
+										],
+										"type": "text/javascript",
+										"packages": {}
+									}
+								}
+							],
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"username\": \"admin\",\n  \"password\": \"12345678\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/login",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"login"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Forgot Password",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"email\": \"user@example.com\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/forgot-password",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"forgot-password"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Reset Password",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"token\": \"reset-token\",\n  \"new_password\": \"newpass\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/reset-password",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"reset-password"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Validate Token",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/auth/validate-token",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"validate-token"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Change Password",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"old_password\": \"oldpass\",\n  \"new_password\": \"newpass\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/auth/change-password",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"auth",
+										"change-password"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "apartmentStatus",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Apartment Statuses",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/apartment-status/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"apartment-status",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/apartment-status/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"apartment-status",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Apartment Status",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Available2\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/apartment-status",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"apartment-status"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Apartment Status",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Occupied2\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/apartment-status/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"apartment-status",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "3"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Apartment Status",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/apartment-status/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"apartment-status",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "tower",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Towers",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/towers/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"towers",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/towers/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"towers",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Tower",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"Tower_name\": \"Tower A2\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/towers",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"towers"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Tower",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"Tower_name\": \"Tower A Updated\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/towers/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"towers",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Tower",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/towers/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"towers",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "payment",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Payments",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/payment",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"payment"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get Stats",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/payment/stats",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"payment",
+										"stats"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/payment/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"payment",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Owner",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/payment/owner/:owner_id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"payment",
+										"owner",
+										":owner_id"
+									],
+									"variable": [
+										{
+											"key": "owner_id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Payment pennding",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/payment/owner/:owner_id/pending",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"payment",
+										"owner",
+										":owner_id",
+										"pending"
+									],
+									"variable": [
+										{
+											"key": "owner_id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "createPayment",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"amount\": 1000.00,\n    \"owner_id\": 1,\n    \"payment_type\": \"MAINTENANCE\",\n    \"description\": \"Monthly maintenance fee January 2024\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/payment",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"payment"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Make Payments",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n \"method\": \"CASH\",\n    \"payment_date\": \"2024-01-15\" // optional\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/payment/owner/1/pay/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"payment",
+										"owner",
+										"1",
+										"pay",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "parking",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Parking",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/parking/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"parking",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/parking/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"parking",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Parking",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"number\": \"S123\",\n    \"type_id\": \"1\",\n    \"status_id\": \"2\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/parking",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"parking"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Assign Vehicle",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"parkingId\": 1,      // Required: ID of the parking spot\n    \"vehicleTypeId\": 1   // Required: ID of the vehicle type\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/parking/assign",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"parking",
+										"assign"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Parking",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"number\": \"A123\",    // Optional\n    \"type_id\": 1,        // Optional\n    \"status_id\": 1       // Optional\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/parking/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"parking",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Parking",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/parking/9",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"parking",
+										"9"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "pet",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Pets",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/pets/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pets",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/pets/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pets",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Pet",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Max\",\n  \"species\": \"Dog\",\n  \"breed\": \"Golden Retriever\",\n  \"vaccination_card\": \"URL_to_vaccination_card\",\n  \"photo\": \"URL_to_pet_photo\",\n  \"owner_id\": 1\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/pets",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pets"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Pet",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Max\",\n  \"species\": \"Dog\",\n  \"breed\": \"Golden Retriever\",\n  \"vaccination_card\": \"URL_to_vaccination_card\",\n  \"photo\": \"URL_to_pet_photo\",\n  \"owner_id\": 1\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/pets/9",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pets",
+										"9"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Pet",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/pets/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pets",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "survey",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Surveys",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/surveys/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"surveys",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/surveys/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"surveys",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Survey",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Resident Satisfaction Survey 2024\",\n  \"status\": \"active\",\n  \"question\": {\n    \"title\": \"How satisfied are you with the building maintenance?\",\n    \"question_type_id\": 1,\n    \"options\": null\n  }\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/surveys",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"surveys"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Survey",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"title\": \"Updated Customer Satisfaction Survey\",\n  \"description\": \"Updated survey description\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/surveys/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"surveys",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Survey",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/surveys/10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"surveys",
+										"10"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "vehicleType",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Vehicle Types",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/vehicle-Types/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"vehicle-Types",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/vehicle-types/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"vehicle-types",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Vehicle Type",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"Vehicle_type_name\": \"Car2\",\n  \"vehicle_plate\": \"ABC123\",\n  \"vehicle_model\": \"2022\",\n  \"vehicle_brand\": \"Toyota\",\n  \"vehicle_color\": \"Red\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/vehicle-types",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"vehicle-types"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Vehicle Type",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"Vehicle_type_name\": \"Car\",\n  \"vehicle_plate\": \"ABC123\",\n  \"vehicle_model\": \"2022\",\n  \"vehicle_brand\": \"Toyota\",\n  \"vehicle_color\": \"Red\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/vehicle-types/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"vehicle-types",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Vehicle Type",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/vehicleType/2",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"vehicleType",
+										"2"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "question",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/question/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"question",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Survey",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/questions/survey/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"questions",
+										"survey",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Question",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \n  \"survey_id\": 1,  // Make sure this survey exists\n  \"title\": \"Your question text here\",\n  \"question_type_id\": 1,  // Use 1 for text, 2 for multiple_choice, etc.\n  \"options\": [\"Option 1\", \"Option 2\"]  // Only needed for multiple_choice and checkbox types\n\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/questions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"questions"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Question",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\"survey_id\": 1,  // Make sure this survey exists\n  \"title\": \"Your question text here\",\n  \"question_type_id\": 1,  // Use 1 for text, 2 for multiple_choice, etc.\n  \"options\": [\"Option 1\", \"Option 2\"]  // Only needed for multiple_choice and checkbox types\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/questions/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"questions",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Question",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/questions/10",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"questions",
+										"10"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "answer",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Find By Survey",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/answers/survey/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"answers",
+										"survey",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By User",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/answers/user/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"answers",
+										"user",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Answer",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\n  \"survey_id\": 1,\n  \"question_id\": 1,\n  \"user_id\": 1,\n  \"value\": \"Very satisfied\"  // Changed from answer_text to value\n\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/answers",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"answers"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Answer",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/answer/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"answer",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "reservationStatus",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Reservation Statuses",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/reservation-status/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"reservation-status",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/reservation-status/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"reservation-status",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Create Reservation Status",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"status_name\": \"Confirmed2\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/reservation-status",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"reservation-status"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Reservation Status",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"status_name\": \"Cancelled2\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/reservation-status/7",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"reservation-status",
+										"7"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Reservation Status",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/reservation-status/7",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"reservation-status",
+										"7"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "reservationType",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Reservation Types",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/reservation-types/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"reservation-types",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/reservation-types/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"reservation-types",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Create Reservation Type",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"type_name\": \"Conference Room\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/reservation-types",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"reservation-types"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Reservation Type",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"type_name\": \"Meeting Room\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/reservation-types/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"reservation-types",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Reservation Type",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/reservation-types/6",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"reservation-types",
+										"6"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "profile",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Get My Profile",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/profile/me",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"profile",
+										"me"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/profile/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"profile",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Create Profile",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"Profile_fullName\": \"John Doe\",\n  \"Profile_document_type\": \"CC\",\n  \"Profile_document_number\": \"1234567890\",\n  \"Profile_telephone_number\": \"3001234567\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/profile",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"profile"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Profile",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"first_name\": \"Jane\",\n  \"last_name\": \"Smith\",\n  \"address\": \"456 Oak Ave\",\n  \"phone\": \"555-987-6543\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/profile/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"profile",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Profile",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/profile/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"profile",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "roles",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Roles",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/roles/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"roles",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/roles/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"roles",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "3"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Role",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"admin2\",\n  \"description\": \"Administrator role\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/roles",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"roles"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Role",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"super-admin\",\n  \"description\": \"Super Administrator role\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/roles/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"roles",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "6"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Role",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/roles/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"roles",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "6"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "permissions",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Permissions",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/permissions/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"permissions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/permissions/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"permissions",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "2"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Permission",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"users:read\",\n  \"description\": \"Can read user data\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/permissions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"permissions"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Permission",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"users:write\",\n  \"description\": \"Can write user data\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/permissions/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"permissions",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "5"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Permission",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/permissions/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"permissions",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "5"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "rolesPermissions",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Role Permissions",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/role-permissions/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"role-permissions",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/role-permissions/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"role-permissions",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Role Permission",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"roleId\": 1,      // The ID of the role\n  \"permissionId\": 1 // The ID of the permission\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/role-permissions",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"role-permissions"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Role Permission",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\"roleId\": 1,      // The ID of the role\n  \"permissionId\": 1,\n  \"moduleId\":1 // \n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/role-permissions/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"role-permissions",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "893"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Role Permission",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/role-permissions/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"role-permissions",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "893"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "modules",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Modules",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/modules/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"modules",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/modules/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"modules",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "2"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Module",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"test2\",\n  \"description\": \"Test\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/modules",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"modules"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Module",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"user-management\",\n  \"description\": \"Updated user management module\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/modules/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"modules",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "31"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Module",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/modules/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"modules",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "31"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "userStatus",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All User Statuses",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/user-status/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"user-status",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/user-status/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"user-status",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register User Status",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"active2\",\n  \"description\": \"Active user status\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user-status",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"user-status"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update User Status",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"inactive2\",\n  \"description\": \"Inactive user status\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/user-status/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"user-status",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "5"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete User Status",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/user-status/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"user-status",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "5"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "pqrs",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All PQRS",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/pqrs/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pqrs",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Get PQRS Stats",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/pqrs/stats",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pqrs",
+										"stats"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/pqrs/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pqrs",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Owner",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/pqrs/owner/:owner_id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pqrs",
+										"owner",
+										":owner_id"
+									],
+									"variable": [
+										{
+											"key": "owner_id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Status",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/pqrs/status/:status_id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pqrs",
+										"status",
+										":status_id"
+									],
+									"variable": [
+										{
+											"key": "status_id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Category",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/pqrs/category/:category_id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pqrs",
+										"category",
+										":category_id"
+									],
+									"variable": [
+										{
+											"key": "category_id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register PQRS",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n \n  \"owner_id\": 1,\n  \"category_id\":2,\n   \"subject\":\"Example\", \n   \"description\":\"description\", \n   \"priority\":\"HIgh\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/pqrs",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pqrs"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update PQRS",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n\n   \"subject\":\"Example\", \n   \"description\":\"description\", \n   \"priority\":\"HIgh\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/pqrs/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pqrs",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "2"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update PQRS Status",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"status_id\": 2,\n  \"admin_response\": \"YEs\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/pqrs/:id/status",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pqrs",
+										":id",
+										"status"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "2"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete PQRS",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/pqrs/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pqrs",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "pqrsCategory",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All PQRS Categories",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/pqrs-categories/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pqrs-categories",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/pqrs-categories/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pqrs-categories",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register PQRS Category",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Petition\",\n  \"description\": \"Petition\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/pqrs-categories",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pqrs-categories"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update PQRS Category",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Technical Support\"\n\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/pqrs-categories/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pqrs-categories",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete PQRS Category",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/pqrs-categories/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"pqrs-categories",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "visitor",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Visitors",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/visitors/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"visitors",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/visitors/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"visitors",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Host",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/visitors/host/:host_id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"visitors",
+										"host",
+										":host_id"
+									],
+									"variable": [
+										{
+											"key": "host_id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Date",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/visitors/date/:enter_date",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"visitors",
+										"date",
+										":enter_date"
+									],
+									"variable": [
+										{
+											"key": "enter_date",
+											"value": "2024-03-15"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Visitor",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"host_id\" : 1,\n        \"visitor_name\":\"Artbaddon\",\n        \"document_number\":\"123123123\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/visitors",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"visitors"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Visitor",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"visitor_name\": \"Jane Doe\",\n    \"document_number\": \"987654321\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/visitors/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"visitors",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "1"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Visitor",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/visitors/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"visitors",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id",
+											"value": "2"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "reservation",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Reservations",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/reservations/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"reservations",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/reservations/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"reservations",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Owner",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/reservations/owner/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"reservations",
+										"owner",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Date Range",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/reservations/date-range?start_date=2024-03-20&end_date=2025-10-21",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"reservations",
+										"date-range"
+									],
+									"query": [
+										{
+											"key": "start_date",
+											"value": "2024-03-20"
+										},
+										{
+											"key": "end_date",
+											"value": "2025-10-21"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Reservation",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n    \"owner_id\": 1,\n    \"type_id\": 1,\n    \"facility_id\": 1,\n    \"start_date\": \"2025-10-04T10:00:00\",\n    \"end_date\": \"2025-10-05T12:00:00\",\n    \"description\": \"lala\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/reservations",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"reservations"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Reservation",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"start_date\": \"2024-03-20T11:00:00\",\n  \"end_date\": \"2024-03-20T13:00:00\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/reservations/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"reservations",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Reservation",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/reservations/:id",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"reservations",
+										":id"
+									],
+									"variable": [
+										{
+											"key": "id"
+										}
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "guard",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Guards",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/guards/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"guards",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/guards/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"guards",
+										"1"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Shift",
+							"request": {
+								"method": "GET",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/guards/shift/Morning",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"guards",
+										"shift",
+										"Morning"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Guard",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"username\":\"example\", \n    \"password\":\"12345678\", \n    \"arl\":\"EPS\", \n    \"eps\":\"SURA\", \n    \"shift\":\"Morning\",\n    \"fullName\":\"Guard Guard\",\n    \"documentType\":\"CC\",\n    \"documentNumber\":\"1021412412\",\n    \"telephoneNumber\":\"3123212311\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/guards",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"guards"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Guard",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n   \"username\":\"example\", \n    \"password\":\"12345678\", \n    \"arl\":\"EPS\", \n    \"eps\":\"SURA\", \n    \"shift\":\"Morning\",\n    \"fullName\":\"Guard Guard\",\n    \"documentType\":\"CC\",\n    \"documentNumber\":\"1021412412\",\n    \"telephoneNumber\":\"3123212311\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/guards/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"guards",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Guard",
+							"request": {
+								"method": "DELETE",
+								"header": [],
+								"url": {
+									"raw": "{{baseUrl}}/guards/2",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"guards",
+										"2"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		},
+		{
+			"name": "facilities",
+			"item": [
+				{
+					"name": "get",
+					"item": [
+						{
+							"name": "Show All Facilities",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/facilities/",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"facilities",
+										""
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Status",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/facilities/status?status=available",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"facilities",
+										"status"
+									],
+									"query": [
+										{
+											"key": "status",
+											"value": "available"
+										}
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Find By Id",
+							"request": {
+								"method": "GET",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/facilities/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"facilities",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "post",
+					"item": [
+						{
+							"name": "Register Facility",
+							"request": {
+								"method": "POST",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Conference Room24\",\n  \"description\": \"Large meeting space2\",\n  \"capacity\": 20,\n  \"status\": \"available\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/facilities",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"facilities"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "update",
+					"item": [
+						{
+							"name": "Update Facility",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"name\": \"Updated Conference Room\",\n  \"description\": \"Updated description\",\n  \"capacity\": 25\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/facilities/2",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"facilities",
+										"2"
+									]
+								}
+							},
+							"response": []
+						},
+						{
+							"name": "Update Status",
+							"request": {
+								"method": "PUT",
+								"header": [
+									{
+										"key": "Content-Type",
+										"value": "application/json"
+									},
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"body": {
+									"mode": "raw",
+									"raw": "{\n  \"status\": \"maintenance\"\n}"
+								},
+								"url": {
+									"raw": "{{baseUrl}}/facilities/2/status",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"facilities",
+										"2",
+										"status"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				},
+				{
+					"name": "delete",
+					"item": [
+						{
+							"name": "Delete Facility",
+							"request": {
+								"method": "DELETE",
+								"header": [
+									{
+										"key": "Authorization",
+										"value": "Bearer {{authToken}}",
+										"type": "text"
+									}
+								],
+								"url": {
+									"raw": "{{baseUrl}}/facilities/1",
+									"host": [
+										"{{baseUrl}}"
+									],
+									"path": [
+										"facilities",
+										"1"
+									]
+								}
+							},
+							"response": []
+						}
+					]
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{authToken}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global pre-request script that runs before every request",
+					"// You can add common logic here if needed"
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					"// Global test script that runs after every request",
+					"// You can add common response handling logic here if needed"
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api"
+		},
+		{
+			"key": "authToken",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
